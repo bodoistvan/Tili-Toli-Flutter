@@ -12,17 +12,46 @@ class MyCanvas extends StatefulWidget {
 }
 
 class CanvasState extends State<MyCanvas> {
-  static int columns = 6;
-  static int rows = 6;
+  var columns = 3;
+  var rows = 3;
+
+  var gameover = false;
 
   final _canvasColor = Colors.orange;
-  var _tileValues = List(columns * rows);
+  final _canvasWidth = 350.0;
+  final _canvasHeight = 350.0;
+  var _tileValues = new List<int>();
 
   var _stepCounter = 0;
 
   CanvasState(){
     for (var i = 0; i < columns * rows; i++){
-      this._tileValues[i] = i;
+      this._tileValues.add(i);
+    }
+
+  }
+
+  onMenuSelected(String selected){
+    if (selected == '3x3'){
+      setState(() {
+        this.rows = 3;
+        this.columns = 3;
+        this.restartGame();
+      });
+    }
+    if (selected == '4x4'){
+      setState(() {
+        this.rows = 4;
+        this.columns = 4;
+        this.restartGame();
+      });
+    }
+    if (selected == '5x5'){
+      setState(() {
+        this.rows = 5;
+        this.columns = 5;
+        this.restartGame();
+      });
     }
   }
 
@@ -34,6 +63,19 @@ class CanvasState extends State<MyCanvas> {
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
         title: Text("Tili-Toli"),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: onMenuSelected,
+            itemBuilder: (BuildContext context) {
+              return {'3x3', '4x4', '5x5'}.map((String choice) {
+                return PopupMenuItem<String>(
+                  value: choice,
+                  child: Text(choice),
+                );
+              }).toList();
+            },
+          ),
+        ],
       ),
       body: Center(
           child:
@@ -56,20 +98,26 @@ class CanvasState extends State<MyCanvas> {
                     ),
                   ),
                   Container(
-                      width: columns.toDouble() * 50,
-                      height: rows.toDouble() * 50,
+                      width: _canvasHeight,
+                      height: _canvasWidth,
                       color: _canvasColor,
                       child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: (){
-                          var counter = 0;
+
+                          if (gameover == true){
+                            return [Center(child: Text("You Won!", textScaleFactor: 3,),)];
+                          }
+
+                          var counter = -1;
                           var columnWidgets = new List<Widget>();
                           for ( var i = 0; i < rows; i++) {
                             var rowWidgets = new List<Widget>();
                             for (var j = 0; j < columns; j++) {
                               var myKey = UniqueKey();
-                              var tile = new TiliTile(onTileClicked, this._tileValues[counter], this._canvasColor);
-                              rowWidgets.add(tile);
                               counter++;
+                              var tile = new TiliTile(onTileClicked, this._tileValues[counter], this._canvasColor, this._canvasWidth / rows, this._tileValues[counter] + 1 == rows*columns);
+                              rowWidgets.add(tile);
                             }
                             columnWidgets.add(Row(children:rowWidgets));
                           }
@@ -92,15 +140,21 @@ class CanvasState extends State<MyCanvas> {
   }
 
   restartGame(){
-    print("restart");
+    _tileValues.clear();
+    for (var i = 0; i < columns * rows; i++){
+      this._tileValues.add(i);
+    }
+
     setState(() {
+      this.gameover = false;
       this._tileValues.shuffle();
       this._stepCounter = 0;
     });
   }
 
   onTileClicked(num value){
-    if (value == 0)
+    num blankedValue = (rows* columns) -1 ;
+    if (value == blankedValue)
       return;
     
     final index = this._tileValues.indexOf(value);
@@ -133,18 +187,38 @@ class CanvasState extends State<MyCanvas> {
   }
 
   bool changeValuePosition(num index_x, num index_y) {
+    num blankedValue = ( rows * columns ) -1 ;
     num valy = this._tileValues[index_y];
-    if (valy != 0){
+    if (valy != blankedValue){
       return false;
     }
 
     num valx = this._tileValues[index_x];
+
+
 
     setState(() {
       this._stepCounter++;
       this._tileValues[index_y] = valx;
       this._tileValues[index_x] = valy;
     });
+    checkGameOver();
     return true;
+  }
+
+  void checkGameOver(){
+    var itIsGameOver= true;
+    for (int i = 0; i < this._tileValues.length -1; i++){
+      if (this._tileValues[i] > this._tileValues[i+1]){
+        itIsGameOver = false;
+        break;
+      }
+    }
+
+    if (itIsGameOver == true){
+      setState(() {
+        this.gameover = true;
+      });
+    }
   }
 }

@@ -7,7 +7,12 @@ class TiliTile extends StatelessWidget {
   final Function callback;
   final displayNumber;
 
-  TiliTile(this.callback, this.displayNumber);
+  final size;
+  final canvasColor;
+
+  final isBlank;
+
+  TiliTile(this.callback, this.displayNumber, this.canvasColor, this.size, this.isBlank );
 
   @override
   Widget build(BuildContext context) {
@@ -15,18 +20,18 @@ class TiliTile extends StatelessWidget {
       GestureDetector(
         child: Container(
             margin: EdgeInsets.all(1),
-            width: 48,
-            height: 48,
+            width: size -2 ,
+            height: size -2,
             decoration: BoxDecoration(
                 border: Border.all(
-                    width: 1.0, color: Colors.red
+                    width: 1.0,
+                    color : isBlank ? this.canvasColor : Colors.red
                 ),
-                color: displayNumber != 0 ? Colors.redAccent : Colors
-                    .deepPurpleAccent
+                color: isBlank ? this.canvasColor : Colors.redAccent
             ),
 
             child: Center(
-              child: Text(displayNumber.toString()),
+              child: Text(isBlank ? '': (displayNumber + 1).toString()),
             )
         ),
         onTap: () {
