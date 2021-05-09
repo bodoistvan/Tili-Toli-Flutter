@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -60,17 +62,27 @@ class CanvasState extends State<MyCanvas> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.redAccent,
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
         title: Text("Tili-Toli"),
         actions: [
           PopupMenuButton<String>(
             onSelected: onMenuSelected,
+            color: Colors.redAccent,
+
             itemBuilder: (BuildContext context) {
               return {'3x3', '4x4', '5x5'}.map((String choice) {
                 return PopupMenuItem<String>(
                   value: choice,
-                  child: Text(choice),
+                  child: Center(
+                    child:
+                    Text(choice,
+                        style: TextStyle(
+                          color: Colors.white,
+                        )
+                    ),
+                  )
                 );
               }).toList();
             },
@@ -87,26 +99,46 @@ class CanvasState extends State<MyCanvas> {
                     width: 200,
                     height: 50,
                     decoration: BoxDecoration(
-                      color: Colors.amber,
+                      borderRadius: BorderRadius.circular(5),
+                      color: Colors.orange,
                       border: Border.all(
                         width: 2,
                         color: Colors.redAccent
                       )
                     ),
                     child: Center(
-                      child: Text("$_stepCounter", textScaleFactor: 1.5,),
+                      child: Text("$_stepCounter", textScaleFactor: 1.5,
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                   Container(
+                      decoration: new BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: _canvasColor,
+                      ),
                       width: _canvasHeight,
                       height: _canvasWidth,
-                      color: _canvasColor,
+
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: (){
 
                           if (gameover == true){
-                            return [Center(child: Text("You Won!", textScaleFactor: 3,),)];
+                            return [Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(10),
+                                child: Text(
+                                  "YOU WON!",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                  ),
+                                  textScaleFactor: 3,
+                                ),
+                              )
+                          )];
                           }
 
                           var counter = -1;
@@ -128,11 +160,11 @@ class CanvasState extends State<MyCanvas> {
                 ],
               )
           ),
-      backgroundColor: Colors.lightBlueAccent,
+      backgroundColor: Colors.orange[400],
       floatingActionButton: FloatingActionButton(
         onPressed: () => {this.restartGame()},
         tooltip: 'Restart',
-        backgroundColor: Colors.red,
+        backgroundColor: Colors.redAccent,
         splashColor: Colors.amber,
         child: Icon(Icons.autorenew),
       ), // This trailing comma makes auto-formatting nicer for build methods.
@@ -145,11 +177,58 @@ class CanvasState extends State<MyCanvas> {
       this._tileValues.add(i);
     }
 
+    shuffleTiles();
+
     setState(() {
       this.gameover = false;
-      this._tileValues.shuffle();
+      this._tileValues = this._tileValues;
       this._stepCounter = 0;
     });
+  }
+  Random r = new Random();
+  shuffleTiles(){
+
+      var count = 0;
+      var blankValue=this.columns *this.rows -1;
+
+      do {
+        var index = this._tileValues.indexOf(blankValue);
+        var direction = r.nextInt(4);
+//check neigbors
+        //top
+        if (index > rows -1 && direction == 0){
+          final other = index - columns;
+          this._tileValues[index] = this._tileValues[other];
+          this._tileValues[other] = blankValue;
+          count++;
+        }
+        //bottom
+        if (index < columns * rows - rows && direction == 1 ){
+          final other = index + columns;
+          this._tileValues[index] = this._tileValues[other];
+          this._tileValues[other] = blankValue;
+          count++;
+        }
+        //left
+        if (index % columns != 0 && direction == 2){
+          final other = index - 1;
+          this._tileValues[index] = this._tileValues[other];
+          this._tileValues[other] = blankValue;
+          count++;
+        }
+        //right
+        if (index % columns != columns-1 && direction == 3){
+          final other = index + 1;
+          this._tileValues[index] = this._tileValues[other];
+          this._tileValues[other] = blankValue;
+          count++;
+        }
+
+
+
+      }while(count != 1000);
+
+      print(this._tileValues);
   }
 
   onTileClicked(num value){
@@ -194,8 +273,6 @@ class CanvasState extends State<MyCanvas> {
     }
 
     num valx = this._tileValues[index_x];
-
-
 
     setState(() {
       this._stepCounter++;

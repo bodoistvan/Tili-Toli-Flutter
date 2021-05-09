@@ -19,19 +19,25 @@ class TiliTile extends StatelessWidget {
     return
       GestureDetector(
         child: Container(
+          
             margin: EdgeInsets.all(1),
             width: size -2 ,
             height: size -2,
-            decoration: BoxDecoration(
+            decoration: new BoxDecoration(
                 border: Border.all(
                     width: 1.0,
                     color : isBlank ? this.canvasColor : Colors.red
+                    
                 ),
+                borderRadius: BorderRadius.circular(10),
                 color: isBlank ? this.canvasColor : Colors.redAccent
             ),
 
             child: Center(
-              child: Text(isBlank ? '': (displayNumber + 1).toString()),
+              child: Text(isBlank ? '': (displayNumber + 1).toString(),
+              style: TextStyle(
+                fontSize: 20, color: Colors.white
+              ),),
             )
         ),
         onTap: () {
